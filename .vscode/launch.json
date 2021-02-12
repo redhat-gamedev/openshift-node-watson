@@ -1,0 +1,16 @@
+{
+    "configurations": [
+    {
+        "name": "Attach by Process ID",
+        "processId": "${command:PickProcess}",
+        "request": "attach",
+        "skipFiles": [
+            "<node_internals>/**"
+        ],
+        "localRoot": "${workspaceRoot}",
+        "remoteRoot": "/opt/app-root/src",
+        "sourceMaps": true,
+        "type": "pwa-node"
+    }
+    ]
+}
