@@ -107,3 +107,4 @@ dist
 .npm-global
 .gnupg
 .vscode-server
+.bash_history

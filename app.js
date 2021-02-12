@@ -4,9 +4,10 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
-var indexRouter = require('./routes/index');
-
 // watson stuff
+let assistant_id = process.env.ASSISTANT_ID;
+let assistant_api_key = process.env.ASSISTANT_IAM_APIKEY;
+let assistant_url = process.env.ASSISTANT_URL;
 var AssistantV2 = require('ibm-watson/assistant/v2'); // watson sdk
 var IamAuthenticator = require('ibm-watson/auth').IamAuthenticator;
 
@@ -14,9 +15,9 @@ var IamAuthenticator = require('ibm-watson/auth').IamAuthenticator;
 var assistant = new AssistantV2({
   version: '2019-02-28',
   authenticator: new IamAuthenticator({
-    apikey: process.env.ASSISTANT_IAM_APIKEY
+    apikey: assistant_api_key
   }),
-  url: process.env.ASSISTANT_URL,
+  url: assistant_url,
 });
 
 var app = express();
@@ -31,7 +32,35 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
+app.get('/', function(req, res, next) {
+  // get a session
+  assistant.createSession({
+    assistantId: assistant_id
+  }).
+  then(res => {
+    let session_id = res.result.session_id;
+
+    assistant.message({
+      assistantId: assistant_id,
+      sessionId: session_id,
+      input: {
+        'message_type': 'text',
+        'text': ''
+        }
+      })
+      .then(res => {
+        console.log(JSON.stringify(res.result, null, 2));
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  })
+  .catch(err => {
+    console.log(err);
+  });
+
+  res.render('index', { title: 'Express' });
+});
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
